@@ -1,7 +1,7 @@
-
 import { Button, InputNumber, Select, Space } from 'antd';
 import { useCallback, useEffect, useState } from 'react';
-import { isPermissionGranted, requestPermission, sendNotification } from '@tauri-apps/api/notification';
+
+import { message } from '@tauri-apps/api/dialog';
 
 const { Option } = Select;
 
@@ -9,14 +9,6 @@ export enum Unit {
   S,
   M,
   H,
-}
-async function checkPermission() {
-  let permissionGranted = await isPermissionGranted();
-  if (!permissionGranted) {
-    const permission = await requestPermission();
-    permissionGranted = permission === 'granted';
-  }
-  return permissionGranted;
 }
 
 function toSecond(time: number, unit: Unit) {
@@ -28,12 +20,8 @@ function toSecond(time: number, unit: Unit) {
   return valueMap[unit];
 }
 
-async function notice(message: string) {
-  const permissionGranted = await checkPermission();
-  if (permissionGranted) {
-    sendNotification('Tauri is awesome!');
-    sendNotification({ title: 'Reminder', body: message });
-  }
+async function notice(text: string) {
+  await message(text, { title: '', type: 'info' });
 }
 
 export function Reminder() {
@@ -53,7 +41,7 @@ export function Reminder() {
     timer = setInterval(async () => {
       if (second-- <= 0) {
         timer && clearInterval(timer)
-        await notice('时间到!!!');
+        await notice('时间到！！');
         return;
       }
       console.log('@@ time', second);
